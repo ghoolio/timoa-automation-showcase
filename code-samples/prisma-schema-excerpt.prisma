@@ -1,0 +1,281 @@
+// Cleaned Prisma schema excerpt from Timoa.
+// Generator, datasource and authentication internals are omitted for the public showcase.
+
+enum AppointmentStatus {
+  SCHEDULED
+  CANCELLED
+}
+
+enum AppointmentEventType {
+  CANCELLED
+  RESCHEDULED
+  REMINDER_SENT
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  salons    Salon[]
+}
+
+model Salon {
+  id                     String   @id @default(cuid())
+  ownerId                String?
+  owner                  User?    @relation(fields: [ownerId], references: [id], onDelete: SetNull)
+
+  name                   String
+  slug                   String   @unique
+  description            String?
+  phone                  String?
+  email                  String?
+  instagramUrl           String?
+  logoUrl                String?
+  coverImageUrl          String?
+  address                String?
+  city                   String?
+  timezone               String   @default("Europe/Berlin")
+
+  paymentOnSiteEnabled   Boolean  @default(true)
+  stripeEnabled          Boolean  @default(false)
+  paypalEnabled          Boolean  @default(false)
+  onlinePaymentEnabled   Boolean  @default(false)
+  cancellationNoticeHours Int?    @default(24)
+
+  bookingMonthsAhead     Int      @default(1)
+  onboardingCompleted    Boolean  @default(false)
+  setupChecklist         Json?
+
+  createdAt              DateTime @default(now())
+  updatedAt              DateTime @updatedAt
+
+  services               Service[]
+  openingHours           OpeningHour[]
+  staffMembers           StaffMember[]
+  appointments           Appointment[]
+  payments               Payment[]
+  billingSettings        SalonBillingSettings?
+
+  @@index([ownerId])
+  @@index([onboardingCompleted])
+}
+
+model Service {
+  id              String        @id @default(cuid())
+  salonId         String
+  salon           Salon         @relation(fields: [salonId], references: [id], onDelete: Cascade)
+
+  name            String
+  description     String?
+  category        String?
+  durationMinutes Int
+  priceCents      Int?
+  isActive        Boolean       @default(true)
+  sortOrder       Int           @default(0)
+
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  appointments    Appointment[]
+
+  @@unique([salonId, name])
+  @@index([salonId])
+}
+
+model OpeningHour {
+  id           String   @id @default(cuid())
+  salonId      String
+  salon        Salon    @relation(fields: [salonId], references: [id], onDelete: Cascade)
+
+  dayOfWeek    Int
+  isClosed     Boolean  @default(false)
+  openMinutes  Int?
+  closeMinutes Int?
+
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@unique([salonId, dayOfWeek])
+  @@index([salonId])
+}
+
+model StaffMember {
+  id        String   @id @default(cuid())
+  salonId   String
+  salon     Salon    @relation(fields: [salonId], references: [id], onDelete: Cascade)
+
+  name      String
+  role      String?
+  imageUrl  String?
+  isActive  Boolean  @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([salonId])
+}
+
+model Appointment {
+  id                 String            @id @default(cuid())
+  salonId            String
+  salon              Salon             @relation(fields: [salonId], references: [id], onDelete: Cascade)
+  serviceId          String
+  service            Service           @relation(fields: [serviceId], references: [id])
+
+  customerName       String
+  customerEmail      String
+  customerPhone      String?
+  notes              String?
+
+  startsAt           DateTime
+  endsAt             DateTime
+  status             AppointmentStatus @default(SCHEDULED)
+
+  paymentStatus      String            @default("pay_on_site")
+  paymentMethod      String?
+  paymentAmountCents Int?
+  paidAt             DateTime?
+
+  createdAt          DateTime          @default(now())
+  updatedAt          DateTime          @updatedAt
+
+  events             AppointmentEvent[]
+  payments           Payment[]
+  refunds            Refund[]
+
+  @@index([salonId, startsAt])
+  @@index([serviceId])
+}
+
+model AppointmentEvent {
+  id            String               @id @default(cuid())
+  appointmentId String
+  appointment   Appointment          @relation(fields: [appointmentId], references: [id], onDelete: Cascade)
+
+  type          AppointmentEventType
+  oldStartsAt   DateTime?
+  newStartsAt   DateTime?
+  reason        String?
+  createdAt     DateTime             @default(now())
+
+  @@index([appointmentId, createdAt])
+}
+
+model Payment {
+  id                        String      @id @default(cuid())
+  appointmentId             String
+  appointment               Appointment @relation(fields: [appointmentId], references: [id], onDelete: Cascade)
+  salonId                   String?
+  salon                     Salon?      @relation(fields: [salonId], references: [id], onDelete: SetNull)
+
+  provider                  String
+  providerOrderId           String?
+  providerCaptureId         String?
+  providerPaymentIntentId   String?
+  providerCheckoutSessionId String?     @unique
+
+  status                    String
+  amountCents               Int
+  currency                  String      @default("eur")
+  paymentMethod             String?
+  checkoutUrl               String?
+
+  paidAt                    DateTime?
+  failedAt                  DateTime?
+  cancelledAt               DateTime?
+  expiresAt                 DateTime?
+  rawProviderStatus         String?
+  metadata                  Json?
+
+  createdAt                 DateTime    @default(now())
+  updatedAt                 DateTime    @updatedAt
+  refunds                   Refund[]
+
+  @@index([appointmentId])
+  @@index([salonId, createdAt])
+  @@index([provider, status])
+  @@index([providerOrderId])
+  @@index([providerCaptureId])
+  @@index([providerCheckoutSessionId])
+  @@index([providerPaymentIntentId])
+}
+
+model Refund {
+  id            String   @id @default(cuid())
+  paymentId     String
+  payment       Payment  @relation(fields: [paymentId], references: [id], onDelete: Cascade)
+  appointmentId String
+  appointment   Appointment @relation(fields: [appointmentId], references: [id], onDelete: Cascade)
+
+  status        String   @default("manual_review")
+  amountCents   Int?
+  reason        String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([paymentId])
+  @@index([appointmentId])
+}
+
+model SalonBillingSettings {
+  id                    String   @id @default(cuid())
+  salonId               String   @unique
+  salon                 Salon    @relation(fields: [salonId], references: [id], onDelete: Cascade)
+
+  billingPlan           String   @default("pilot")
+  billingStatus         String   @default("trial")
+  revenueModel          String   @default("none")
+  platformFeeEnabled    Boolean  @default(false)
+  platformFeePercent    Float?
+  platformFeeFixedCents Int?
+  payoutMode            String   @default("not_configured")
+
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  @@index([billingPlan, billingStatus])
+  @@index([revenueModel])
+  @@index([payoutMode])
+}
+
+model AnalyticsEvent {
+  id                     String   @id @default(cuid())
+  eventType              String
+  eventVersion           Int      @default(1)
+  schemaVersion          Int      @default(1)
+  createdAt              DateTime @default(now())
+
+  source                 String?
+  actorType              String?
+  salonId                String?
+  serviceId              String?
+  staffMemberId          String?
+  appointmentId          String?
+  sessionId              String?
+  bookingFunnelId        String?
+  locale                 String?
+  route                  String?
+  routeGroup             String?
+  deviceType             String?
+  viewportCategory       String?
+  city                   String?
+  postalCodePrefix       String?
+  serviceCategory        String?
+  priceCents             Int?
+  durationMinutes        Int?
+  appointmentStartHour   Int?
+  appointmentDayOfWeek   Int?
+  appointmentMonth       Int?
+  leadTimeHours          Int?
+  bookingFunnelStep      String?
+  resultStatus           String?
+  failureReasonCode      String?
+  cancellationReasonCode String?
+  metadata               Json?
+
+  @@index([eventType, createdAt])
+  @@index([salonId, createdAt])
+  @@index([serviceId, createdAt])
+  @@index([appointmentDayOfWeek, appointmentStartHour])
+}

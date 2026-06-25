@@ -1,24 +1,18 @@
-# Code Samples
+# Code samples
 
-This folder is for selected excerpts from the private production codebase.
+These files are cleaned and simplified excerpts or representative samples based on the private Timoa production codebase.
 
-Recommended samples:
+They are included to demonstrate:
 
-- Prisma schema excerpt
-- Payment method selector
-- Payment brand marks
-- Salon insights helper
-- i18n dictionary excerpt
-- Owner onboarding component excerpt
-- Analytics event helper excerpt
-- Pilot owner setup script excerpt
+- workflow state handling
+- appointment creation logic
+- input validation
+- availability checks
+- payment status mapping
+- webhook event normalization
+- insights aggregation
+- owner onboarding progress logic
+- privacy-aware automation event contracts
+- Prisma data modeling
 
-Before publishing, manually review every file in this folder and remove:
-
-- secrets
-- real customer data
-- real email addresses
-- raw payment IDs
-- internal notes
-- manage tokens
-- anything not suitable for public viewing
+This folder is not a full runnable application. Provider verification details, private deployment configuration, raw payment payloads and customer data are intentionally omitted.
