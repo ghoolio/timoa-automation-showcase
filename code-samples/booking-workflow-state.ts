@@ -56,7 +56,10 @@ export function getNextBookingStep(currentStep: BookingStep): BookingStep {
 }
 
 export function totalDurationMinutes(services: BookingService[]) {
-  return services.reduce((total, service) => total + service.durationMinutes, 0);
+  return services.reduce(
+    (total, service) => total + service.durationMinutes,
+    0,
+  );
 }
 
 export function totalPriceCents(services: BookingService[]) {
@@ -64,7 +67,10 @@ export function totalPriceCents(services: BookingService[]) {
     return null;
   }
 
-  return services.reduce((total, service) => total + (service.priceCents ?? 0), 0);
+  return services.reduce(
+    (total, service) => total + (service.priceCents ?? 0),
+    0,
+  );
 }
 
 export function availablePaymentMethods(input: {
@@ -74,20 +80,25 @@ export function availablePaymentMethods(input: {
   onlinePaymentEnabled: boolean;
   totalPriceCents: number | null;
 }): PaymentMethodChoice[] {
-  const payableOnline = input.onlinePaymentEnabled && (input.totalPriceCents ?? 0) > 0;
+  const payableOnline =
+    input.onlinePaymentEnabled && (input.totalPriceCents ?? 0) > 0;
 
   return [
     ...(input.paymentOnSiteEnabled ? ["pay_on_site" as const] : []),
-    ...(payableOnline && input.stripeEnabled ? ["stripe_checkout" as const] : []),
-    ...(payableOnline && input.paypalEnabled ? ["paypal_checkout" as const] : []),
+    ...(payableOnline && input.stripeEnabled
+      ? ["stripe_checkout" as const]
+      : []),
+    ...(payableOnline && input.paypalEnabled
+      ? ["paypal_checkout" as const]
+      : []),
   ];
 }
 
 export function isBookingReady(state: BookingState) {
   return Boolean(
     state.selectedServiceIds.length > 0 &&
-      state.selectedSlot &&
-      state.customerName.trim() &&
-      state.customerEmail.trim(),
+    state.selectedSlot &&
+    state.customerName.trim() &&
+    state.customerEmail.trim(),
   );
 }

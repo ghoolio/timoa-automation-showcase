@@ -82,14 +82,21 @@ type SetupSalon = {
   cancellationNoticeHours: number | null;
   services: Array<{ isActive: boolean }>;
   staffMembers: Array<{ isActive: boolean }>;
-  openingHours: Array<{ isClosed: boolean; openMinutes: number | null; closeMinutes: number | null }>;
+  openingHours: Array<{
+    isClosed: boolean;
+    openMinutes: number | null;
+    closeMinutes: number | null;
+  }>;
 };
 
 function present(value: string | null | undefined) {
   return Boolean(value?.trim());
 }
 
-function countCompleted(checklist: OnboardingChecklist, steps: readonly OnboardingStep[]) {
+function countCompleted(
+  checklist: OnboardingChecklist,
+  steps: readonly OnboardingStep[],
+) {
   return steps.filter((step) => checklist[step]).length;
 }
 
@@ -98,9 +105,16 @@ export function getOnboardingProgress(input: {
   ownerName?: string | null;
 }): OnboardingProgress {
   const hasPublicSlug = present(input.salon.slug);
-  const hasActiveService = input.salon.services.some((service) => service.isActive);
-  const hasStaffOrOwnerFallback = input.salon.staffMembers.some((staff) => staff.isActive) || present(input.ownerName);
-  const hasOpeningHours = input.salon.openingHours.some((hour) => !hour.isClosed && hour.openMinutes !== null && hour.closeMinutes !== null);
+  const hasActiveService = input.salon.services.some(
+    (service) => service.isActive,
+  );
+  const hasStaffOrOwnerFallback =
+    input.salon.staffMembers.some((staff) => staff.isActive) ||
+    present(input.ownerName);
+  const hasOpeningHours = input.salon.openingHours.some(
+    (hour) =>
+      !hour.isClosed && hour.openMinutes !== null && hour.closeMinutes !== null,
+  );
   const paymentMethodsEnabled = [
     input.salon.paymentOnSiteEnabled,
     input.salon.stripeEnabled,
@@ -114,10 +128,16 @@ export function getOnboardingProgress(input: {
     availability: hasOpeningHours,
     media: present(input.salon.logoUrl) || present(input.salon.coverImageUrl),
     payments: paymentMethodsEnabled > 0,
-    policies: input.salon.cancellationPolicyEnabled || Boolean(input.salon.cancellationNoticeHours) || present(input.salon.cancellationPolicyText),
+    policies:
+      input.salon.cancellationPolicyEnabled ||
+      Boolean(input.salon.cancellationNoticeHours) ||
+      present(input.salon.cancellationPolicyText),
     bookingLink: hasPublicSlug && hasActiveService,
   };
-  const completedRequiredCount = countCompleted(checklist, requiredOnboardingSteps);
+  const completedRequiredCount = countCompleted(
+    checklist,
+    requiredOnboardingSteps,
+  );
   const completedCount = countCompleted(checklist, onboardingSteps);
   const totalRequiredCount = requiredOnboardingSteps.length;
 

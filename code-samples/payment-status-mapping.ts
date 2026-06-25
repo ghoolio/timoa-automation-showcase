@@ -24,7 +24,8 @@ export const paymentProviders = {
   paypal: "paypal",
 } as const;
 
-export type InternalPaymentStatus = (typeof paymentStatuses)[keyof typeof paymentStatuses];
+export type InternalPaymentStatus =
+  (typeof paymentStatuses)[keyof typeof paymentStatuses];
 
 export type ProviderPaymentStatus =
   | "created"
@@ -38,7 +39,9 @@ export type ProviderPaymentStatus =
   | "expired"
   | "pending";
 
-export function mapProviderPaymentStatus(status: ProviderPaymentStatus): InternalPaymentStatus {
+export function mapProviderPaymentStatus(
+  status: ProviderPaymentStatus,
+): InternalPaymentStatus {
   switch (status) {
     case "completed":
     case "captured":
@@ -62,11 +65,14 @@ export function deriveReturnState(input: {
   paymentStatus: InternalPaymentStatus;
   appointmentPaymentStatus: InternalPaymentStatus;
 }) {
-  const paid = input.paymentStatus === paymentStatuses.paid ||
+  const paid =
+    input.paymentStatus === paymentStatuses.paid ||
     input.appointmentPaymentStatus === paymentStatuses.paid;
-  const failed = input.paymentStatus === paymentStatuses.failed ||
+  const failed =
+    input.paymentStatus === paymentStatuses.failed ||
     input.appointmentPaymentStatus === paymentStatuses.failed;
-  const expired = input.paymentStatus === paymentStatuses.expired ||
+  const expired =
+    input.paymentStatus === paymentStatuses.expired ||
     input.appointmentPaymentStatus === paymentStatuses.expired;
 
   return {

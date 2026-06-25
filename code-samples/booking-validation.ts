@@ -44,7 +44,9 @@ function asStringArray(value: unknown) {
     return [];
   }
 
-  return value.filter((item): item is string => typeof item === "string" && Boolean(item.trim()));
+  return value.filter(
+    (item): item is string => typeof item === "string" && Boolean(item.trim()),
+  );
 }
 
 function isEmail(value: string) {
@@ -59,7 +61,9 @@ function asPaymentMethodChoice(value: unknown) {
     : null;
 }
 
-export function validateAppointmentInput(input: AppointmentInput):
+export function validateAppointmentInput(
+  input: AppointmentInput,
+):
   | { ok: true; value: ValidatedAppointmentInput }
   | { ok: false; reason: string } {
   const salonSlug = asRequiredString(input.salonSlug);
@@ -69,7 +73,13 @@ export function validateAppointmentInput(input: AppointmentInput):
   const customerName = asRequiredString(input.customerName);
   const customerEmail = asRequiredString(input.customerEmail);
 
-  if (!salonSlug || !serviceId || !startsAtInput || !customerName || !customerEmail) {
+  if (
+    !salonSlug ||
+    !serviceId ||
+    !startsAtInput ||
+    !customerName ||
+    !customerEmail
+  ) {
     return { ok: false, reason: "missing_required_fields" };
   }
 
@@ -90,7 +100,9 @@ export function validateAppointmentInput(input: AppointmentInput):
       serviceId,
       serviceIds,
       staffMemberId: asOptionalString(input.staffMemberId),
-      paymentMethodChoice: asPaymentMethodChoice(input.paymentMethodChoice) as keyof typeof paymentMethods | null,
+      paymentMethodChoice: asPaymentMethodChoice(input.paymentMethodChoice) as
+        | keyof typeof paymentMethods
+        | null,
       startsAt,
       customerName,
       customerEmail,

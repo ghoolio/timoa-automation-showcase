@@ -4,7 +4,10 @@
  * This sample focuses on the workflow shape: validate -> load -> check -> create -> respond.
  */
 
-import { validateAppointmentInput, type AppointmentInput } from "./booking-validation";
+import {
+  validateAppointmentInput,
+  type AppointmentInput,
+} from "./booking-validation";
 import { paymentMethods, paymentStatuses } from "./payment-status-mapping";
 
 type Service = {
@@ -28,8 +31,15 @@ type Salon = {
 
 type AppointmentCreateContext = {
   findSalonBySlug(slug: string): Promise<Salon | null>;
-  findActiveServices(input: { salonId: string; serviceIds: string[] }): Promise<Service[]>;
-  isSlotAvailable(input: { salonId: string; startsAt: Date; durationMinutes: number }): Promise<boolean>;
+  findActiveServices(input: {
+    salonId: string;
+    serviceIds: string[];
+  }): Promise<Service[]>;
+  isSlotAvailable(input: {
+    salonId: string;
+    startsAt: Date;
+    durationMinutes: number;
+  }): Promise<boolean>;
   createAppointment(input: {
     salonId: string;
     serviceId: string;
@@ -42,7 +52,11 @@ type AppointmentCreateContext = {
     paymentStatus: string;
     paymentAmountCents: number | null;
   }): Promise<{ id: string; startsAt: Date; endsAt: Date }>;
-  track(event: { eventType: string; resultStatus: string; reason?: string }): Promise<void>;
+  track(event: {
+    eventType: string;
+    resultStatus: string;
+    reason?: string;
+  }): Promise<void>;
 };
 
 function priceSummaryCents(services: Array<{ priceCents: number | null }>) {
@@ -50,7 +64,10 @@ function priceSummaryCents(services: Array<{ priceCents: number | null }>) {
     return null;
   }
 
-  return services.reduce((total, service) => total + (service.priceCents ?? 0), 0);
+  return services.reduce(
+    (total, service) => total + (service.priceCents ?? 0),
+    0,
+  );
 }
 
 function choosePaymentMethod(input: {
@@ -58,50 +75,84 @@ function choosePaymentMethod(input: {
   requestedPaymentMethod: string | null;
   totalPriceCents: number | null;
 }) {
-  const payableOnline = input.salon.onlinePaymentEnabled && (input.totalPriceCents ?? 0) > 0;
+  const payableOnline =
+    input.salon.onlinePaymentEnabled && (input.totalPriceCents ?? 0) > 0;
   const available = [
     ...(input.salon.paymentOnSiteEnabled ? [paymentMethods.payOnSite] : []),
-    ...(payableOnline && input.salon.stripeEnabled ? [paymentMethods.stripeCheckout] : []),
-    ...(payableOnline && input.salon.paypalEnabled ? [paymentMethods.paypalCheckout] : []),
+    ...(payableOnline && input.salon.stripeEnabled
+      ? [paymentMethods.stripeCheckout]
+      : []),
+    ...(payableOnline && input.salon.paypalEnabled
+      ? [paymentMethods.paypalCheckout]
+      : []),
   ];
 
-  return input.requestedPaymentMethod && available.includes(input.requestedPaymentMethod as never)
+  return input.requestedPaymentMethod &&
+    available.includes(input.requestedPaymentMethod as never)
     ? input.requestedPaymentMethod
-    : available[0] ?? paymentMethods.payOnSite;
+    : (available[0] ?? paymentMethods.payOnSite);
 }
 
 function paymentStatusFor(method: string, totalPriceCents: number | null) {
-  if (method === paymentMethods.stripeCheckout || method === paymentMethods.paypalCheckout) {
+  if (
+    method === paymentMethods.stripeCheckout ||
+    method === paymentMethods.paypalCheckout
+  ) {
     return paymentStatuses.pending;
   }
 
-  return totalPriceCents === 0 ? paymentStatuses.notRequired : paymentStatuses.payOnSite;
+  return totalPriceCents === 0
+    ? paymentStatuses.notRequired
+    : paymentStatuses.payOnSite;
 }
 
-export async function createAppointmentAction(input: AppointmentInput, context: AppointmentCreateContext) {
+export async function createAppointmentAction(
+  input: AppointmentInput,
+  context: AppointmentCreateContext,
+) {
   const validated = validateAppointmentInput(input);
 
   if (!validated.ok) {
-    await context.track({ eventType: "booking_failed", resultStatus: "failed", reason: validated.reason });
+    await context.track({
+      eventType: "booking_failed",
+      resultStatus: "failed",
+      reason: validated.reason,
+    });
     return { ok: false, status: 400, error: validated.reason };
   }
 
   const salon = await context.findSalonBySlug(validated.value.salonSlug);
 
   if (!salon) {
-    await context.track({ eventType: "booking_failed", resultStatus: "failed", reason: "salon_not_found" });
+    await context.track({
+      eventType: "booking_failed",
+      resultStatus: "failed",
+      reason: "salon_not_found",
+    });
     return { ok: false, status: 404, error: "salon_not_found" };
   }
 
-  const selectedServiceIds = Array.from(new Set([validated.value.serviceId, ...validated.value.serviceIds]));
-  const services = await context.findActiveServices({ salonId: salon.id, serviceIds: selectedServiceIds });
+  const selectedServiceIds = Array.from(
+    new Set([validated.value.serviceId, ...validated.value.serviceIds]),
+  );
+  const services = await context.findActiveServices({
+    salonId: salon.id,
+    serviceIds: selectedServiceIds,
+  });
 
   if (services.length !== selectedServiceIds.length) {
-    await context.track({ eventType: "booking_failed", resultStatus: "failed", reason: "service_not_found" });
+    await context.track({
+      eventType: "booking_failed",
+      resultStatus: "failed",
+      reason: "service_not_found",
+    });
     return { ok: false, status: 404, error: "service_not_found" };
   }
 
-  const totalDurationMinutes = services.reduce((total, service) => total + service.durationMinutes, 0);
+  const totalDurationMinutes = services.reduce(
+    (total, service) => total + service.durationMinutes,
+    0,
+  );
   const totalPriceCents = priceSummaryCents(services);
   const slotAvailable = await context.isSlotAvailable({
     salonId: salon.id,
@@ -110,7 +161,11 @@ export async function createAppointmentAction(input: AppointmentInput, context: 
   });
 
   if (!slotAvailable) {
-    await context.track({ eventType: "booking_failed", resultStatus: "failed", reason: "slot_unavailable" });
+    await context.track({
+      eventType: "booking_failed",
+      resultStatus: "failed",
+      reason: "slot_unavailable",
+    });
     return { ok: false, status: 409, error: "slot_unavailable" };
   }
 
@@ -124,7 +179,9 @@ export async function createAppointmentAction(input: AppointmentInput, context: 
     salonId: salon.id,
     serviceId: validated.value.serviceId,
     startsAt: validated.value.startsAt,
-    endsAt: new Date(validated.value.startsAt.getTime() + totalDurationMinutes * 60_000),
+    endsAt: new Date(
+      validated.value.startsAt.getTime() + totalDurationMinutes * 60_000,
+    ),
     customerName: validated.value.customerName,
     customerEmail: validated.value.customerEmail,
     customerPhone: validated.value.customerPhone,
@@ -133,12 +190,17 @@ export async function createAppointmentAction(input: AppointmentInput, context: 
     paymentAmountCents: totalPriceCents,
   });
 
-  await context.track({ eventType: "booking_created", resultStatus: "success" });
+  await context.track({
+    eventType: "booking_created",
+    resultStatus: "success",
+  });
 
   return {
     ok: true,
     status: 201,
     appointment,
-    paymentRequired: paymentMethod === paymentMethods.stripeCheckout || paymentMethod === paymentMethods.paypalCheckout,
+    paymentRequired:
+      paymentMethod === paymentMethods.stripeCheckout ||
+      paymentMethod === paymentMethods.paypalCheckout,
   };
 }

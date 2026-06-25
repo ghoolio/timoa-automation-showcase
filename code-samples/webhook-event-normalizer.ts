@@ -3,9 +3,14 @@
  * Provider verification and raw provider payloads are intentionally omitted from this public sample.
  */
 
-import { mapProviderPaymentStatus, paymentProviders, type InternalPaymentStatus } from "./payment-status-mapping";
+import {
+  mapProviderPaymentStatus,
+  paymentProviders,
+  type InternalPaymentStatus,
+} from "./payment-status-mapping";
 
-export type PaymentProvider = (typeof paymentProviders)[keyof typeof paymentProviders];
+export type PaymentProvider =
+  (typeof paymentProviders)[keyof typeof paymentProviders];
 
 export type NormalizedPaymentEvent = {
   provider: PaymentProvider;
@@ -79,9 +84,12 @@ function normalizeProviderStatus(value: string | null | undefined) {
   return "pending";
 }
 
-export function normalizePayPalWebhook(event: PayPalWebhookEvent): NormalizedPaymentEvent {
+export function normalizePayPalWebhook(
+  event: PayPalWebhookEvent,
+): NormalizedPaymentEvent {
   const resource = event.resource ?? {};
-  const relatedOrderId = resource.supplementary_data?.related_ids?.order_id ?? null;
+  const relatedOrderId =
+    resource.supplementary_data?.related_ids?.order_id ?? null;
   const providerStatus = normalizeProviderStatus(resource.status);
 
   return {
@@ -99,8 +107,12 @@ export function normalizePayPalWebhook(event: PayPalWebhookEvent): NormalizedPay
   };
 }
 
-export function normalizeStripeCheckoutCompleted(session: StripeCheckoutSession): NormalizedPaymentEvent {
-  const providerStatus = normalizeProviderStatus(session.payment_status ?? session.status ?? undefined);
+export function normalizeStripeCheckoutCompleted(
+  session: StripeCheckoutSession,
+): NormalizedPaymentEvent {
+  const providerStatus = normalizeProviderStatus(
+    session.payment_status ?? session.status ?? undefined,
+  );
 
   return {
     provider: paymentProviders.stripe,
@@ -118,6 +130,13 @@ export function normalizeStripeCheckoutCompleted(session: StripeCheckoutSession)
 }
 
 export function shouldFulfillPayment(event: NormalizedPaymentEvent) {
-  return event.internalStatus === "paid" &&
-    Boolean(event.paymentId || event.appointmentId || event.providerOrderId || event.providerCheckoutSessionId);
+  return (
+    event.internalStatus === "paid" &&
+    Boolean(
+      event.paymentId ||
+      event.appointmentId ||
+      event.providerOrderId ||
+      event.providerCheckoutSessionId,
+    )
+  );
 }

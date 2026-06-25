@@ -10,12 +10,26 @@ type AvailabilityRequest = {
   date?: string | null;
 };
 
-export function validateAvailabilityRequest(input: AvailabilityRequest):
-  | { ok: true; value: { salonSlug: string; serviceId?: string; serviceIds: string[]; date: string } }
+export function validateAvailabilityRequest(
+  input: AvailabilityRequest,
+):
+  | {
+      ok: true;
+      value: {
+        salonSlug: string;
+        serviceId?: string;
+        serviceIds: string[];
+        date: string;
+      };
+    }
   | { ok: false; reason: string } {
   const serviceIds = input.serviceIds?.filter(Boolean) ?? [];
 
-  if (!input.salonSlug || (!input.serviceId && serviceIds.length === 0) || !input.date) {
+  if (
+    !input.salonSlug ||
+    (!input.serviceId && serviceIds.length === 0) ||
+    !input.date
+  ) {
     return { ok: false, reason: "salonSlug_service_and_date_required" };
   }
 

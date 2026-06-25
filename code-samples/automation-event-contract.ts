@@ -52,7 +52,9 @@ export type AutomationEventType =
   | "onboarding_completed"
   | "insights_page_viewed";
 
-export type AutomationEvent = Partial<Record<AutomationEventField, string | number | null>> & {
+export type AutomationEvent = Partial<
+  Record<AutomationEventField, string | number | null>
+> & {
   eventType: AutomationEventType;
   eventVersion?: number;
   schemaVersion?: number;
@@ -68,7 +70,10 @@ export type AutomationEventDefinition = {
   notes?: string;
 };
 
-export const automationEventRegistry: Record<AutomationEventType, AutomationEventDefinition> = {
+export const automationEventRegistry: Record<
+  AutomationEventType,
+  AutomationEventDefinition
+> = {
   booking_started: {
     eventType: "booking_started",
     description: "A visitor started the booking funnel.",
@@ -89,7 +94,8 @@ export const automationEventRegistry: Record<AutomationEventType, AutomationEven
     defaultEnabled: true,
     allowedMetadataKeys: ["serviceCount", "hasStaffPreference"],
     piiRisk: "low",
-    notes: "Do not include customer name, email, phone or appointment management links.",
+    notes:
+      "Do not include customer name, email, phone or appointment management links.",
   },
   booking_failed: {
     eventType: "booking_failed",
@@ -186,7 +192,11 @@ export const automationEventRegistry: Record<AutomationEventType, AutomationEven
     eventType: "onboarding_completed",
     description: "Owner completed required onboarding steps.",
     defaultEnabled: true,
-    allowedMetadataKeys: ["completedCount", "totalCount", "paymentMethodsEnabled"],
+    allowedMetadataKeys: [
+      "completedCount",
+      "totalCount",
+      "paymentMethodsEnabled",
+    ],
     piiRisk: "low",
   },
   insights_page_viewed: {
@@ -208,7 +218,10 @@ function safeString(value: unknown, maxLength = 120) {
 }
 
 function safeInteger(value: unknown, min = 0, max = Number.MAX_SAFE_INTEGER) {
-  return typeof value === "number" && Number.isInteger(value) && value >= min && value <= max
+  return typeof value === "number" &&
+    Number.isInteger(value) &&
+    value >= min &&
+    value <= max
     ? value
     : undefined;
 }
@@ -247,7 +260,12 @@ export function sanitizeAutomationEvent(input: AutomationEvent) {
   for (const key of definition.allowedMetadataKeys) {
     const value = input.metadata?.[key];
 
-    if (typeof value === "string" || typeof value === "number" || typeof value === "boolean" || value === null) {
+    if (
+      typeof value === "string" ||
+      typeof value === "number" ||
+      typeof value === "boolean" ||
+      value === null
+    ) {
       metadata[key] = value;
     }
   }

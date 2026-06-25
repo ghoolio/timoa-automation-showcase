@@ -10,14 +10,14 @@ The full production repository is private. This showcase contains selected scree
 
 ## Project at a glance
 
-| Area | What it shows |
-|---|---|
-| Workflow automation | Booking, confirmation, payment state and appointment management flows |
-| Process analysis | Manual salon coordination translated into a structured digital process |
-| API / webhook thinking | Payment and email integrations with event-driven status handling |
-| Owner operations | Dashboard, onboarding and booking link setup for salon owners |
-| Privacy-conscious analytics | Aggregated insights without exposing customer personal data |
-| AI-assisted development | Iterative planning, implementation, testing and documentation with AI agents |
+| Area                        | What it shows                                                                |
+| --------------------------- | ---------------------------------------------------------------------------- |
+| Workflow automation         | Booking, confirmation, payment state and appointment management flows        |
+| Process analysis            | Manual salon coordination translated into a structured digital process       |
+| API / webhook thinking      | Payment and email integrations with event-driven status handling             |
+| Owner operations            | Dashboard, onboarding and booking link setup for salon owners                |
+| Privacy-conscious analytics | Aggregated insights without exposing customer personal data                  |
+| AI-assisted development     | Iterative planning, implementation, testing and documentation with AI agents |
 
 ---
 

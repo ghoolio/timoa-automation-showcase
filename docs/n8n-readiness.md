@@ -26,9 +26,11 @@ Timoa demonstrates these same fundamentals through custom application code.
 ### 1. New appointment workflow
 
 Trigger:
+
 - appointment.created event or webhook
 
 Steps:
+
 1. Validate appointment payload.
 2. Fetch salon and service details.
 3. Send customer confirmation email.
@@ -39,9 +41,11 @@ Steps:
 ### 2. Payment completed workflow
 
 Trigger:
+
 - Stripe or PayPal payment completed webhook
 
 Steps:
+
 1. Verify provider event.
 2. Match payment to appointment.
 3. Update payment status.
@@ -52,9 +56,11 @@ Steps:
 ### 3. Cancellation manual review workflow
 
 Trigger:
+
 - online-paid appointment cancelled
 
 Steps:
+
 1. Detect payment method and status.
 2. Mark refund as manual review needed.
 3. Notify owner.
@@ -65,9 +71,11 @@ Steps:
 ### 4. Weekly insights workflow
 
 Trigger:
+
 - weekly schedule
 
 Steps:
+
 1. Query appointments for last 7 days.
 2. Aggregate bookings, cancellations, payment methods and top services.
 3. Create summary.
