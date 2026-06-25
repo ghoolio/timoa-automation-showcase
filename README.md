@@ -167,7 +167,6 @@ It is designed to avoid exposing customer personal data in analytics views.
 
 ```txt
 .
-├── application-material/
 │   ├── cover-letter-auvia-draft.md
 │   ├── cover-letter-jupito-draft.md
 │   ├── interview-talking-points.md
@@ -186,8 +185,6 @@ It is designed to avoid exposing customer personal data in analytics views.
 │   ├── new-appointment-workflow.md
 │   ├── payment-completed-workflow.md
 │   └── weekly-salon-insights-workflow.md
-├── CV_SNIPPETS.md
-├── PUBLICATION_CHECKLIST.md
 ├── SECURITY.md
 └── README.md
 ```
@@ -213,16 +210,6 @@ It is designed to avoid exposing customer personal data in analytics views.
 - [New appointment workflow](workflow-blueprints/new-appointment-workflow.md)
 - [Payment completed workflow](workflow-blueprints/payment-completed-workflow.md)
 - [Weekly salon insights workflow](workflow-blueprints/weekly-salon-insights-workflow.md)
-
----
-
-## Application material
-
-This repository also includes supporting material for automation-focused applications:
-
-- [Target role alignment](application-material/target-role-alignment.md)
-- [Interview talking points](application-material/interview-talking-points.md)
-- [CV snippets](CV_SNIPPETS.md)
 
 ---
 
